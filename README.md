@@ -1,6 +1,6 @@
-# keycloak-jwtauth-swagger
+# forras-admin2-server
 
-This is a homework project for Keycloak JWT authentication for [forras-admin](https://github.com/pzoli/forras-admin) v2 project
+This is [forras-admin](https://github.com/pzoli/forras-admin) v2 server project
 
 ## Used technologies
 
