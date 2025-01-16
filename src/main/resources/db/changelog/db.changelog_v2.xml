@@ -1,0 +1,109 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro
+        http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+
+    <changeSet id="xml-1" author="pzoli (generated)">
+        <insert tableName="doctor">
+            <column name="id" value="1" />
+            <column name="name" value="dr. Haszmann Andrea" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="xml-2" author="pzoli (generated)">
+        <insert tableName="subjecttype">
+            <column name="id" value="-1"/>
+            <column name="name" value="találkozó"/>
+        </insert>
+        <insert tableName="subjecttype">
+            <column name="id" value="1"/>
+            <column name="name" value="étkezés"/>
+        </insert>
+        <insert tableName="subjecttype">
+            <column name="id" value="2"/>
+            <column name="name" value="ügyintézés"/>
+        </insert>
+        <insert tableName="subjecttype">
+            <column name="id" value="3"/>
+            <column name="name" value="mentális tanácsadás"/>
+        </insert>
+        <insert tableName="subjecttype">
+            <column name="id" value="4"/>
+            <column name="name" value="szabadidős program"/>
+        </insert>
+        <insert tableName="subjecttype">
+            <column name="id" value="5"/>
+            <column name="name" value="egyéb"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="xml-3" author="pzoli (generated)">
+        <insert tableName="subject">
+            <column name="id" value="-1"/>
+            <column name="title" value="Találkozó"/>
+            <column name="subject_type" value="-1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="xml-4" author="pzoli (generated)">
+        <insert tableName="client_type">
+            <column name="id" value="1"/>
+            <column name="typename" value="Nappali ellátott"/>
+        </insert>
+        <insert tableName="client_type">
+            <column name="id" value="2"/>
+            <column name="typename" value="Közösségi ellátott"/>
+        </insert>
+        <insert tableName="client_type">
+            <column name="id" value="3"/>
+            <column name="typename" value="Kerületen kívüli"/>
+        </insert>
+        <insert tableName="client_type">
+            <column name="id" value="4"/>
+            <column name="typename" value="Krízis étkeztetés"/>
+        </insert>
+        <insert tableName="client_type">
+            <column name="id" value="5"/>
+            <column name="typename" value="Preventív"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="xml-5" author="pzoli (generated)">
+        <insert tableName="accessibletype">
+            <column name="id" value="1"/>
+            <column name="typename" value="lakcím"/>
+        </insert>
+        <insert tableName="accessibletype">
+            <column name="id" value="2"/>
+            <column name="typename" value="telefon"/>
+        </insert>
+        <insert tableName="accessibletype">
+            <column name="id" value="3"/>
+            <column name="typename" value="mobil"/>
+        </insert>
+        <insert tableName="accessibletype">
+            <column name="id" value="4"/>
+            <column name="typename" value="tartózkodási hely"/>
+        </insert>
+        <insert tableName="accessibletype">
+            <column name="id" value="5"/>
+            <column name="typename" value="e-mail"/>
+        </insert>
+        <insert tableName="accessibletype">
+            <column name="id" value="6"/>
+            <column name="typename" value="gondnok"/>
+        </insert>
+        <insert tableName="accessibletype">
+            <column name="id" value="7"/>
+            <column name="typename" value="hozzátartozó"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
