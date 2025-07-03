@@ -26,6 +26,13 @@ public class DoctorController  {
         return doctorRepository.findAll();
     }
 
+    @GetMapping(path="/{doctorId}")
+    @PreAuthorize("hasRole('user') or hasRole('manager')")
+    public ResponseEntity<Doctor> getDoctor(@PathVariable(value = "doctorId") Long doctorId) {
+        Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+        return doctor == null ? new ResponseEntity<Doctor>(HttpStatus.NOT_FOUND) : ResponseEntity.ok(doctor);
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('manager')")
     public Doctor createDoctors(@RequestBody Doctor doctor) {
