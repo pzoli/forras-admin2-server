@@ -1,7 +1,7 @@
 package hu.infokristaly.keycloakauthenticatoin.controller;
 
 import hu.infokristaly.keycloakauthenticatoin.entity.Client;
-import hu.infokristaly.keycloakauthenticatoin.repository.ClientRepository;
+import hu.infokristaly.keycloakauthenticatoin.services.ClientService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ import java.util.List;
 @SecurityRequirement(name = "Keycloak")
 public class ClientController {
     @Autowired
-    ClientRepository clientRepository;
+    ClientService clientService;
 
     public ClientController() {
         super();
@@ -25,13 +25,13 @@ public class ClientController {
     @GetMapping
     @PreAuthorize("hasRole('user')")
     public List<Client> getAllClients() {
-        return clientRepository.findAll();
+        return clientService.getAllClients();
     }
 
     @GetMapping(path="/{clientId}")
     @PreAuthorize("hasRole('user') or hasRole('manager')")
     public ResponseEntity<Client> getClient(@PathVariable(value = "clientId") Long clientId) {
-        Client client = clientRepository.findById(clientId).orElse(null);
+        Client client = clientService.getClient(clientId);
         return client == null ? new ResponseEntity<Client>(HttpStatus.NOT_FOUND) : ResponseEntity.ok(client);
     }
 
@@ -39,32 +39,32 @@ public class ClientController {
     @PreAuthorize("hasRole('manager')")
     public Client createClient(@RequestBody Client client) {
         client.setId(null);
-        return clientRepository.save(client);
+        return clientService.createClient(client);
     }
 
     @PutMapping
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<Client> updateClient(@RequestBody Client client) {
-        Client origin = clientRepository.findById(client.getId()).orElse(null);
+        Client origin = clientService.getClient(client.getId());
         if (origin == null) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        client = clientRepository.save(client);
-        return new ResponseEntity(client, HttpStatus.OK);
+        client = clientService.updateClient(client);
+        return new ResponseEntity<>(client, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<?> deleteClient(@PathVariable Long id) {
-        Client client = clientRepository.findById(id).orElse(null);
+        Client client = clientService.getClient(id);
         if (client == null) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         try {
-            clientRepository.delete(client);
+            clientService.deleteById(id);
         } catch (Exception e) {
-            return new ResponseEntity(HttpStatus.FAILED_DEPENDENCY);
+            return new ResponseEntity<>(HttpStatus.FAILED_DEPENDENCY);
         }
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -10,7 +10,7 @@ public class Doctor implements Serializable {
 
     private static final long serialVersionUID = 8139245173549972194L;
     
-    private Integer id;
+    private Long id;
     private String name;
 
     /**
@@ -19,13 +19,13 @@ public class Doctor implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(unique=true, nullable=false)
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
     /**
      * @param id the id to set
      */
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -1,8 +1,7 @@
 package hu.infokristaly.keycloakauthenticatoin.controller;
 
-import hu.infokristaly.keycloakauthenticatoin.entity.Client;
 import hu.infokristaly.keycloakauthenticatoin.entity.Doctor;
-import hu.infokristaly.keycloakauthenticatoin.repository.DoctorRepository;
+import hu.infokristaly.keycloakauthenticatoin.services.DoctorService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,51 +17,50 @@ import java.util.List;
 @SecurityRequirement(name = "Keycloak")
 public class DoctorController  {
     @Autowired
-    DoctorRepository doctorRepository;
+    DoctorService doctorService;
 
     @GetMapping
     @PreAuthorize("hasRole('user') or hasRole('manager')")
     public List<Doctor> getAllDoctors() {
-        return doctorRepository.findAll();
+        return doctorService.getAllDoctors();
     }
 
     @GetMapping(path="/{doctorId}")
     @PreAuthorize("hasRole('user') or hasRole('manager')")
     public ResponseEntity<Doctor> getDoctor(@PathVariable(value = "doctorId") Long doctorId) {
-        Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
+        Doctor doctor = doctorService.getDoctor(doctorId);
         return doctor == null ? new ResponseEntity<Doctor>(HttpStatus.NOT_FOUND) : ResponseEntity.ok(doctor);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('manager')")
-    public Doctor createDoctors(@RequestBody Doctor doctor) {
-        return doctorRepository.save(doctor);
+    public Doctor createDoctor(@RequestBody Doctor doctor) {
+        return doctorService.createDoctor(doctor);
     }
 
     @PutMapping
     @PreAuthorize("hasRole('manager')")
     public Doctor updateDoctors(@RequestBody Doctor doctor) {
-        Doctor origin = doctorRepository.findById(doctor.getId().longValue()).orElse(null);
+        Doctor origin = doctorService.getDoctor(doctor.getId().longValue());
         if (origin == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor with id " + origin.getId() + " does not exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor with id " + doctor.getId() + " does not exist");
         }
-        return doctorRepository.save(doctor);
+        return doctorService.updateDoctor(doctor);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('manager')")
     public ResponseEntity<?> deleteDoctors(@PathVariable Long id) {
-
-        Doctor doctor = doctorRepository.findById(id).orElse(null);
+        Doctor doctor = doctorService.getDoctor(id);
         if (doctor == null) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         try {
-            doctorRepository.deleteById(id);
+            doctorService.deleteById(doctor.getId());
         } catch (Exception e) {
-            return new ResponseEntity(HttpStatus.FAILED_DEPENDENCY);
+            return new ResponseEntity<>(HttpStatus.FAILED_DEPENDENCY);
         }
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
