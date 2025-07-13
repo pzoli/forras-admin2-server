@@ -37,6 +37,7 @@ public class UserController {
             put("name", user.getClaimAsString("name"));
             put("email", user.getClaimAsString("email"));
             put("roles", user.getClaimAsStringList("roles"));
+            put("expiresAt", user.getExpiresAt());
         }};
     }
 
