@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ClientTests extends JWTBasedUnitTests {
+public class ClientServiceTests extends JWTBasedUnitTests {
 
     @InjectMocks
     private ClientService clientService;
@@ -81,6 +81,8 @@ public class ClientTests extends JWTBasedUnitTests {
     @Order(2)
     @Test
     public void testClientCreateDelete() throws Exception {
+        when(clientRepository.existsById(client.getId())).thenReturn(true);
+
         MockHttpServletRequestBuilder request = post("/api/client")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", this.bearer)
