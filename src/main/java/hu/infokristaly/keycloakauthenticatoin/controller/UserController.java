@@ -33,7 +33,7 @@ public class UserController {
         Jwt user = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return new HashMap() {{
-            put("sub", user.getClaimAsString("sub"));
+            put("sub", user.getClaimAsString("sub")); //UUID
             put("name", user.getClaimAsString("name"));
             put("email", user.getClaimAsString("email"));
             put("roles", user.getClaimAsStringList("roles"));
