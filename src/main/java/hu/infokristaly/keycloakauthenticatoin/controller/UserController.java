@@ -41,6 +41,21 @@ public class UserController {
         }};
     }
 
+    @GetMapping(path = "/userlist")
+    public List<UserRepresentation> getUserList() {
+        Jwt userJWT = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Keycloak keycloak = Keycloak.getInstance(
+                cliServerUrl,
+                "master",
+                cliUser,
+                cliPassword,
+                "admin-cli");
+
+        UsersResource userResource = keycloak.realm("infokristaly").users();
+        return userResource.list();
+    }
+
     @PutMapping(path = "/setlang/{lang}")
     public void updateLanguage(@PathVariable String lang) {
         Jwt userJWT = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
