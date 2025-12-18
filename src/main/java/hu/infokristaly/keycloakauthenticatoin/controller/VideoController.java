@@ -87,6 +87,16 @@ public class VideoController {
         mediaInfoService.updateMediaInfo(foundMediaInfo);
     }
 
+    @DeleteMapping(path = "/delete/{id}")
+    public void deleteMediaInfos(@PathParam("id") String id) throws IOException {
+        Jwt user = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        MediaInfo foundMediaInfo = mediaInfoService.findByFileName(id);
+        if (foundMediaInfo != null  && !foundMediaInfo.getSystemUserSub().equals(user.getSubject())) {
+            throw new IOException("Yuo are not permitted to delete this video!");
+        }
+        mediaInfoService.deleteById(Long.parseLong(id));
+    }
+
     @GetMapping(path = "/stream", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<InputStreamResource> downloadMediaFile(@QueryParam("origin") String origin) throws IOException {
         Path filePath = Paths.get(videoPath.toString(), origin);
