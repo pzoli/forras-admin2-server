@@ -23,7 +23,7 @@ public class MediaInfoService {
     }
 
     public List<MediaInfo> getAllMediaInfoBySystemUserSub(String systemUserSub) {
-        return mediaInfoRepository.findBySystemUserSub(systemUserSub).orElse(null);
+        return mediaInfoRepository.findBySystemUserSubOrderByFileNameAsc(systemUserSub).orElse(null);
     }
 
     public MediaInfo getMediaInfo(Long mediaInfoId) {

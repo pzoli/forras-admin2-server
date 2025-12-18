@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface MediaInfoRepository extends JpaRepository<MediaInfo, Long> {
     public Optional<MediaInfo> findByFileName(String fileName);
-    public Optional<List<MediaInfo>> findBySystemUserSub(String systemUserSub);
+    public Optional<List<MediaInfo>> findBySystemUserSubOrderByFileNameAsc(String systemUserSub);
 }
