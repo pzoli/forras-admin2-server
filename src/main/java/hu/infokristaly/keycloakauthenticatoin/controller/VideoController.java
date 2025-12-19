@@ -16,10 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -36,14 +33,14 @@ public class VideoController {
 
     @PutMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    public void updateMediaFile(@RequestParam("file") MultipartFile file, @RequestParam("origin") String origin) throws IOException {
+    public void updateMediaFile(@RequestParam("file") MultipartFile file, @RequestParam("origin") String origin, @RequestParam("islast") boolean isLastChunk ) throws IOException {
         Jwt user = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!origin.startsWith(user.getSubject())) {
             throw new IOException("Yuo are not permitted to upload this video!");
         }
         Path path = Paths.get(videoPath.toString(), origin + ".webm");
+        MediaInfo foundMediaInfo = mediaInfoService.findByFileName(origin);
         if (!path.toFile().exists()) {
-            MediaInfo foundMediaInfo = mediaInfoService.findByFileName(origin);
             if (foundMediaInfo != null && foundMediaInfo.getCloseDate() != null) {
                 throw new IOException("Closed MediaInfo found in database!");
             }
@@ -54,11 +51,15 @@ public class VideoController {
                 throw ex;
             }
         } else {
-            MediaInfo foundMediaInfo = mediaInfoService.findByFileName(origin);
             if (foundMediaInfo == null) {
                 throw new IOException("MediaInfo not found in database!");
             }
             Files.write(path, file.getBytes(), StandardOpenOption.APPEND);
+            if (isLastChunk) {
+                foundMediaInfo.setCloseDate(new Date());
+                mediaInfoService.updateMediaInfo(foundMediaInfo);
+                fixVideoDuration(origin+".webm");
+            }
         }
     }
 
@@ -75,15 +76,18 @@ public class VideoController {
         return result;
     }
 
-    @PutMapping(path = "/closemedia")
-    public void setCloseDateOfMediaInfo(@QueryParam("origin") String origin) throws IOException {
-        Jwt user = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!origin.startsWith(user.getSubject())) {
-            throw new IOException("Yuo are not permitted to upload this video!");
+    private void fixVideoDuration(String inputPath) {
+        try {
+            String outputPath = inputPath.replace(".webm", "_fixed.webm");
+            ProcessBuilder pb = new ProcessBuilder(
+                    "ffmpeg", "-y", "-i", inputPath, "-c", "copy", outputPath
+            );
+            pb.directory(videoPath.toFile());
+            pb.inheritIO().start().waitFor();
+            Files.move(Paths.get(videoPath.toString(),outputPath), Paths.get(videoPath.toString(),inputPath), StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        MediaInfo foundMediaInfo = mediaInfoService.findByFileName(origin);
-        foundMediaInfo.setCloseDate(new Date());
-        mediaInfoService.updateMediaInfo(foundMediaInfo);
     }
 
     @DeleteMapping
