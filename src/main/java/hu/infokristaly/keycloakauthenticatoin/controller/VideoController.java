@@ -3,11 +3,9 @@ package hu.infokristaly.keycloakauthenticatoin.controller;
 import hu.infokristaly.keycloakauthenticatoin.entity.MediaInfo;
 import hu.infokristaly.keycloakauthenticatoin.services.MediaInfoService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -71,9 +68,11 @@ public class VideoController {
         return user.getSubject() + "_" +new SimpleDateFormat("yyyyMMdd-HHmmssSSS").format(new Date());
     }
 
-    @GetMapping(path = "/mediainfos/{sub}")
-    public List<MediaInfo> getMediaInfos(@PathParam("sub") String sub) {
-        return mediaInfoService.getAllMediaInfoBySystemUserSub(sub);
+
+    @GetMapping(path = "/mediainfos")
+    public List<MediaInfo> getMediaInfos(@QueryParam("sub") String sub) {
+        List<MediaInfo> result = mediaInfoService.getAllMediaInfoBySystemUserSub(sub);
+        return result;
     }
 
     @PutMapping(path = "/closemedia")
@@ -87,14 +86,18 @@ public class VideoController {
         mediaInfoService.updateMediaInfo(foundMediaInfo);
     }
 
-    @DeleteMapping(path = "/delete/{id}")
-    public void deleteMediaInfos(@PathParam("id") String id) throws IOException {
+    @DeleteMapping
+    public void deleteMediaInfos(@QueryParam("id") Long id) throws IOException {
         Jwt user = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        MediaInfo foundMediaInfo = mediaInfoService.findByFileName(id);
+        MediaInfo foundMediaInfo = mediaInfoService.getMediaInfo(id);
         if (foundMediaInfo != null  && !foundMediaInfo.getSystemUserSub().equals(user.getSubject())) {
             throw new IOException("Yuo are not permitted to delete this video!");
         }
-        mediaInfoService.deleteById(Long.parseLong(id));
+        mediaInfoService.deleteById(id);
+        Path filePath = Paths.get(videoPath.toString(), foundMediaInfo.getFileName()+".webm");
+        if (Files.exists(filePath)) {
+            Files.delete(filePath);
+        }
     }
 
     @GetMapping(path = "/stream", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)

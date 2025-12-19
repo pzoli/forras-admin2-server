@@ -1,6 +1,7 @@
 package hu.infokristaly.keycloakauthenticatoin.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +17,7 @@ public class MediaInfo implements Serializable {
     private Long id;
 
     @Column(unique = true, nullable = false)
+    @NotNull
     private String fileName;
 
     @Temporal(TemporalType.TIMESTAMP)
