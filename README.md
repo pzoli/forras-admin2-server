@@ -14,3 +14,7 @@ This is [forras-admin](https://github.com/pzoli/forras-admin) v2 server project
 
 Create forrashaz database on localhost.
 Please copy src/main/resources/example.application.properties to application.properties and set PostgreSQL username and password.
+
+Setup a Keycloak auth server for Spring Security!
+
+Video messages are postprocessed with ffmpeg. Please don't forget to install this software on your Linux server.
