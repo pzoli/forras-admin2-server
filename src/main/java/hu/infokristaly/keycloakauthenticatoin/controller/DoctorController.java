@@ -32,7 +32,7 @@ public class DoctorController  {
         return doctor == null ? new ResponseEntity<Doctor>(HttpStatus.NOT_FOUND) : ResponseEntity.ok(doctor);
     }
 
-    @PostMapping
+    @PostMapping(consumes = "application/json")
     @PreAuthorize("hasRole('manager')")
     public Doctor createDoctor(@RequestBody Doctor doctor) {
         return doctorService.createDoctor(doctor);
