@@ -20,6 +20,8 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/video")
@@ -54,11 +56,19 @@ public class VideoController {
             if (foundMediaInfo == null) {
                 throw new IOException("MediaInfo not found in database!");
             }
-            Files.write(path, file.getBytes(), StandardOpenOption.APPEND);
+            if (file.getBytes().length > 0) {
+                Files.write(path, file.getBytes(), StandardOpenOption.APPEND);
+            }
             if (isLastChunk) {
                 foundMediaInfo.setCloseDate(new Date());
                 mediaInfoService.updateMediaInfo(foundMediaInfo);
-                fixVideoDuration(origin+".webm");
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        fixVideoDuration(origin+".webm");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }, CompletableFuture.delayedExecutor(1, TimeUnit.SECONDS));
             }
         }
     }
@@ -79,17 +89,35 @@ public class VideoController {
     private void fixVideoDuration(String inputPath) {
         try {
             String outputPath = inputPath.replace(".webm", "_fixed.webm");
-            ProcessBuilder pb = new ProcessBuilder(
-                    "ffmpeg", "-y", "-i", inputPath, "-c", "copy", outputPath
-            );
-            pb.directory(videoPath.toFile());
-            pb.inheritIO().start().waitFor();
-            Files.move(Paths.get(videoPath.toString(),outputPath), Paths.get(videoPath.toString(),inputPath), StandardCopyOption.REPLACE_EXISTING);
+            int exitCode = repairVideoFile(inputPath, outputPath);
+            if (exitCode == 0) {
+                Files.move(Paths.get(videoPath.toString(), outputPath), Paths.get(videoPath.toString(), inputPath), StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                exitCode = encodeVideoFile(inputPath, outputPath);
+                if (exitCode == 0) {
+                    Files.move(Paths.get(videoPath.toString(), outputPath), Paths.get(videoPath.toString(), inputPath), StandardCopyOption.REPLACE_EXISTING);
+                } else {
+                    Files.delete(Paths.get(videoPath.toString(), outputPath));
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private int repairVideoFile(String inputPath, String outputPath) throws IOException, InterruptedException  {
+        ProcessBuilder pb = new ProcessBuilder("ffmpeg", "-y", "-i", inputPath, "-c", "copy", outputPath);
+        pb.directory(videoPath.toFile());
+        return pb.inheritIO().start().waitFor();
+    }
+
+    private int encodeVideoFile(String inputPath, String outputPath) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(
+                "ffmpeg","-y", "-i", inputPath,"-c:v", "libvpx-vp9", "-crf", "30", "-b:v", "0", "-row-mt", "1", "-threads", "8", "-c:a", "libopus", outputPath
+        );
+        pb.directory(videoPath.toFile());
+        return pb.inheritIO().start().waitFor();
+    }
     @DeleteMapping
     public void deleteMediaInfos(@QueryParam("id") Long id) throws IOException {
         Jwt user = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
